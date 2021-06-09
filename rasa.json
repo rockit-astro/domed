@@ -1,0 +1,27 @@
+{
+  "daemon": "rasa_dome",
+  "log_name": "rasa_dome",
+  "control_machines": ["RASAMain"],
+  "serial_port": "/dev/dome",
+  "serial_baud": 9600,
+  "serial_timeout": 3,
+  "command_delay": 0.25,
+  "step_command_delay": 2.0,
+  "shutter_timeout": 40,
+  "has_legacy_controller": false,
+  "has_bumper_guard": true,
+  "slow_open_steps": 5,
+  "heartbeat_port": "/dev/dome-monitor",
+  "heartbeat_baud": 9600,
+  "heartbeat_timeout": 3,
+  "sides": {
+    "south": "a",
+    "north": "b",
+    "both": "ab"
+  },
+  "side_labels": {
+    "a": "South",
+    "b": "North"
+  },
+  "invert_on_close": true
+}

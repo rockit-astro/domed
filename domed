@@ -15,14 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with domed.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Dome daemon for the Warwick one-metre telescope"""
-
-# pylint: disable=too-many-instance-attributes
-# pylint: disable=too-many-branches
-# pylint: disable=too-many-statements
-# pylint: disable=too-many-return-statements
-# pylint: disable=broad-except
-# pylint: disable=invalid-name
+"""Astrohaven dome daemon"""
 
 import argparse
 import datetime
@@ -30,46 +23,14 @@ import threading
 import time
 import Pyro4
 import serial
-from warwick.observatory.common import (
-    daemons,
-    log,
-    IP,
-    TryLock)
+from warwick.observatory.common import log, TryLock
 from warwick.observatory.common.helpers import pyro_client_matches
 
 from warwick.observatory.dome import (
-    DomeConfig,
+    Config,
     CommandStatus,
     DomeShutterStatus,
     DomeHeartbeatStatus)
-
-DOME_CONFIG = {
-    'onemetre': DomeConfig('onemetre_dome',
-                           daemons.onemetre_dome,
-                           [IP.OneMetreDome, IP.OneMetreTCS],
-                           serial_port='/dev/dome',
-                           heartbeat_port='/dev/dome-monitor'),
-    'rasa': DomeConfig('rasa_dome',
-                       daemons.rasa_dome,
-                       [IP.RASAMain],
-                       shutter_timeout_seconds=40,
-                       command_delay_seconds=0.25,
-                       step_command_delay_seconds=2,
-                       has_bumper_guard=True,
-                       # Open part way using steps to avoid belt slackening
-                       # then open the rest of the way normally
-                       slow_open_steps=5,
-                       serial_port='/dev/dome',
-                       heartbeat_port='/dev/dome-monitor'),
-    'nites': DomeConfig('nites_dome',
-                        daemons.nites_dome,
-                        [IP.NitesMain],
-                        shutter_timeout_seconds=19,
-                        command_delay_seconds=0.25,
-                        step_command_delay_seconds=0.25,
-                        serial_port='COM3',
-                        heartbeat_port='COM4')
-}
 
 
 class DomeDaemon:
@@ -313,8 +274,7 @@ class DomeDaemon:
                     raise serial.SerialException('Failed to send command R')
                 time.sleep(step_delay)
             except Exception as exception:
-                log.error(self._config.log_name, 'Failed to send serial command (' \
-                          + str(exception) + ')')
+                log.error(self._config.log_name, 'Failed to send serial command (' + str(exception) + ')')
 
         # Sound the siren for 5 seconds before any movement
         if siren and self._heartbeat_siren_enabled:
@@ -325,8 +285,7 @@ class DomeDaemon:
 
                 time.sleep(5.)
             except Exception as exception:
-                log.error(self._config.log_name, 'Failed to send heartbeat serial command (' \
-                          + str(exception) + ')')
+                log.error(self._config.log_name, 'Failed to send heartbeat serial command (' + str(exception) + ')')
 
         step_count = 0
         start_time = datetime.datetime.utcnow()
@@ -338,8 +297,7 @@ class DomeDaemon:
                     raise serial.SerialException('Failed to send command ' + command)
                 step_count += 1
             except Exception as exception:
-                log.error(self._config.log_name, 'Failed to send serial command (' \
-                          + str(exception) + ')')
+                log.error(self._config.log_name, 'Failed to send serial command (' + str(exception) + ')')
             time.sleep(step_delay)
             runtime = (datetime.datetime.utcnow() - start_time).total_seconds()
             heartbeat_tripped = self._heartbeat_status == DomeHeartbeatStatus.TrippedClosing or \
@@ -408,8 +366,7 @@ class DomeDaemon:
                     status = self._shutter_a if side == 'a' else self._shutter_b
                     return status == DomeShutterStatus.Open or 0 < steps <= s
 
-                success = success and self.__move_shutter(side, at_requested_limit, step_delay,
-                                                          timeout, not slow_open)
+                success = success and self.__move_shutter(side, at_requested_limit, step_delay, timeout, not slow_open)
             # pylint: enable=cell-var-from-loop
 
             if not success:
@@ -577,7 +534,7 @@ class DomeDaemon:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Dome daemon')
-    parser.add_argument('dome', choices=DOME_CONFIG.keys(), help='Telescope')
+    parser.add_argument('config', help='Path to configuration json file')
     args = parser.parse_args()
-    dome = DOME_CONFIG[args.dome]
-    dome.daemon.launch(DomeDaemon(dome))
+    c = Config(args.config)
+    c.daemon.launch(DomeDaemon(c))

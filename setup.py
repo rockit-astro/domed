@@ -18,10 +18,9 @@ from distutils.core import setup
 
 setup(name='warwick.observatory.dome',
       version='0',
-      packages = ['warwick.observatory.dome'],
+      packages=['warwick.observatory.dome'],
       author='Paul Chote',
-      description='Common code for the Warwick observatory dome daemons',
+      description='Common code for the dome daemon',
       license='GNU GPLv3',
       author_email='p.chote@warwick.ac.uk',
-      url="https://github.com/warwick-one-metre/domed",
-)
+      url="https://github.com/warwick-one-metre/domed")

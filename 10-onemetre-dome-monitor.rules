@@ -1,1 +1,0 @@
-SUBSYSTEM=="tty", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="204b", ATTRS{serial}=="75438343737351316121", SYMLINK="dome-monitor", MODE="0666"

@@ -1,0 +1,27 @@
+{
+  "daemon": "nites_dome",
+  "log_name": "nites_dome",
+  "control_machines": ["NitesMain"],
+  "serial_port": "COM3",
+  "serial_baud": 9600,
+  "serial_timeout": 3,
+  "command_delay": 0.25,
+  "step_command_delay": 0.25,
+  "shutter_timeout": 19,
+  "has_legacy_controller": false,
+  "has_bumper_guard": false,
+  "slow_open_steps": 0,
+  "heartbeat_port": "COM4",
+  "heartbeat_baud": 9600,
+  "heartbeat_timeout": 3,
+  "sides": {
+    "north": "a",
+    "south": "b",
+    "both": "ab"
+  },
+  "side_labels": {
+    "a": "North",
+    "b": "South"
+  },
+  "invert_on_close": false
+}

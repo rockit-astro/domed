@@ -6,14 +6,9 @@ RPMBUILD = rpmbuild --define "_topdir %(pwd)/build" \
 
 all:
 	mkdir -p build
-	cp dome dome.bak
-	${RPMBUILD} -ba onemetre-dome-server.spec
-	${RPMBUILD} -ba rasa-dome-server.spec
-	awk '{sub("DOME = .*$$","DOME = \"onemetre\""); print $0}' dome.bak > dome
-	${RPMBUILD} -ba onemetre-dome-client.spec
-	awk '{sub("DOME = .*$$","DOME = \"rasa\""); print $0}' dome.bak > dome
-	${RPMBUILD} -ba rasa-dome-client.spec
+	${RPMBUILD} -ba observatory-dome-server.spec
+	${RPMBUILD} -ba observatory-dome-client.spec
 	${RPMBUILD} -ba python3-warwick-observatory-dome.spec
+	${RPMBUILD} -ba onemetre-dome-data.spec
 	mv build/noarch/*.rpm .
-	mv dome.bak dome
 	rm -rf build

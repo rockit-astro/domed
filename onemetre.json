@@ -1,0 +1,27 @@
+{
+  "daemon": "onemetre_dome",
+  "log_name": "onemetre_dome",
+  "control_machines": ["OneMetreDome", "OneMetreTCS"],
+  "serial_port": "/dev/dome",
+  "serial_baud": 9600,
+  "serial_timeout": 3,
+  "command_delay": 0.5,
+  "step_command_delay": 2.0,
+  "shutter_timeout": 60,
+  "has_legacy_controller": false,
+  "has_bumper_guard": false,
+  "slow_open_steps": 0,
+  "heartbeat_port": "/dev/dome-monitor",
+  "heartbeat_baud": 9600,
+  "heartbeat_timeout": 3,
+  "sides": {
+    "east": "a",
+    "west": "b",
+    "both": "ab"
+  },
+  "side_labels": {
+    "a": " East",
+    "b": " West"
+  },
+  "invert_on_close": true
+}

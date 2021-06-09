@@ -16,15 +16,7 @@
 
 """Constants and status codes used by domed"""
 
-# pylint: disable=too-few-public-methods
-# pylint: disable=invalid-name
-
-FMT_GREEN = u'\033[92m'
-FMT_RED = u'\033[91m'
-FMT_CYAN = u'\033[96m'
-FMT_YELLOW = u'\033[93m'
-FMT_BOLD = u'\033[1m'
-FMT_CLEAR = u'\033[0m'
+from warwick.observatory.common import TFmt
 
 class CommandStatus:
     """Numeric return codes"""
@@ -65,17 +57,18 @@ class CommandStatus:
             return cls._messages[error_code]
         return 'error: Unknown error code {}'.format(error_code)
 
+
 class DomeShutterStatus:
     """Status of the dome shutters"""
     Closed, Open, PartiallyOpen, Opening, Closing, HeartbeatMonitorForceClosing = range(6)
 
     _labels = {
-        0: FMT_RED + FMT_BOLD + 'CLOSED' + FMT_CLEAR,
-        1: FMT_GREEN + FMT_BOLD + 'OPEN' + FMT_CLEAR,
-        2: FMT_CYAN + FMT_BOLD + 'PARTIALLY OPEN' + FMT_CLEAR,
-        3: FMT_YELLOW + FMT_BOLD + 'OPENING' + FMT_CLEAR,
-        4: FMT_YELLOW + FMT_BOLD + 'CLOSING' + FMT_CLEAR,
-        5: FMT_RED + FMT_BOLD + 'FORCE CLOSING' + FMT_CLEAR,
+        0: TFmt.Red + TFmt.Bold + 'CLOSED' + TFmt.Clear,
+        1: TFmt.Green + TFmt.Bold + 'OPEN' + TFmt.Clear,
+        2: TFmt.Cyan + TFmt.Bold + 'PARTIALLY OPEN' + TFmt.Clear,
+        3: TFmt.Yellow + TFmt.Bold + 'OPENING' + TFmt.Clear,
+        4: TFmt.Yellow + TFmt.Bold + 'CLOSING' + TFmt.Clear,
+        5: TFmt.Red + TFmt.Bold + 'FORCE CLOSING' + TFmt.Clear,
     }
 
     @classmethod
@@ -83,18 +76,19 @@ class DomeShutterStatus:
         """Returns a human readable string describing an error code"""
         if status in cls._labels:
             return cls._labels[status]
-        return FMT_RED + FMT_BOLD + 'UNKNOWN STATUS' + FMT_CLEAR
+        return TFmt.Red + TFmt.Bold + 'UNKNOWN STATUS' + TFmt.Clear
+
 
 class DomeHeartbeatStatus:
     """Status of the dome heartbeat monitoring"""
     Disabled, Active, TrippedClosing, TrippedIdle, Unavailable = range(5)
 
     _labels = {
-        0: FMT_BOLD + 'DISABLED' + FMT_CLEAR,
-        1: FMT_GREEN + FMT_BOLD + 'ACTIVE' + FMT_CLEAR,
-        2: FMT_RED + FMT_BOLD + 'CLOSING DOME' + FMT_CLEAR,
-        3: FMT_RED + FMT_BOLD + 'TRIPPED' + FMT_CLEAR,
-        4: FMT_YELLOW + FMT_BOLD + 'UNAVAILABLE' + FMT_CLEAR,
+        0: TFmt.Bold + 'DISABLED' + TFmt.Clear,
+        1: TFmt.Green + TFmt.Bold + 'ACTIVE' + TFmt.Clear,
+        2: TFmt.Red + TFmt.Bold + 'CLOSING DOME' + TFmt.Clear,
+        3: TFmt.Red + TFmt.Bold + 'TRIPPED' + TFmt.Clear,
+        4: TFmt.Yellow + TFmt.Bold + 'UNAVAILABLE' + TFmt.Clear,
     }
 
     @classmethod
@@ -102,4 +96,4 @@ class DomeHeartbeatStatus:
         """Returns a human readable string describing an error code"""
         if status in cls._labels:
             return cls._labels[status]
-        return FMT_RED + FMT_BOLD + 'UNKNOWN STATUS' + FMT_CLEAR
+        return TFmt.Red + TFmt.Bold + 'UNKNOWN STATUS' + TFmt.Clear

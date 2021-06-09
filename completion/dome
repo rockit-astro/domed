@@ -7,22 +7,13 @@ _dome()
     opts="status open close stop heartbeat siren engineering"
 
     case "${prev}" in
-        open)
-            opts="east west both"
-            ;;
-        close)
-            opts="east west both"
+        open|close)
+            opts="$(dome list-sides)"
             ;;
         heartbeat)
-            opts="disable enable"
-            ;;
         siren)
-            opts="disable enable"
-            ;;
         engineering)
             opts="disable enable"
-            ;;
-        *)
             ;;
     esac
 

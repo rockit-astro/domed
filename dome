@@ -18,155 +18,110 @@
 """Commandline client for controlling domed"""
 
 import datetime
+import glob
 import os
 import sys
 import Pyro4
-from warwick.observatory.common import daemons
 from warwick.observatory.dome import (
+    Config,
     CommandStatus,
     DomeShutterStatus,
     DomeHeartbeatStatus)
-
-# Fix terminal coloring on Windows clients
-try:
-    import colorama
-    colorama.init()
-except ImportError:
-    pass
-
-# Set to the appropriate dome from the Makefile
-DOME = 'onemetre'
+from warwick.observatory.common import TFmt
 
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 sys.excepthook = Pyro4.util.excepthook
 
-FMT_GREEN = u'\033[92m'
-FMT_RED = u'\033[91m'
-FMT_CYAN = u'\033[96m'
-FMT_YELLOW = u'\033[93m'
-FMT_BOLD = u'\033[1m'
-FMT_CLEAR = u'\033[0m'
 
-DAEMONS = {
-    'onemetre': daemons.onemetre_dome,
-    'rasa': daemons.rasa_dome,
-    'nites': daemons.nites_dome,
-}
+def run_command(command, args):
+    """Runs a daemon command, handling error messages"""
+    if 'DOMED_CONFIG_PATH' in os.environ:
+        config = Config(os.environ['DOMED_CONFIG_PATH'])
+    else:
+        # Load the config file defined in the DOMED_CONFIG_PATH environment variable or from the
+        # default system location (/etc/domed/). Exit with an error if zero or multiple are found.
+        files = glob.glob("/etc/domed/*.json")
+        if len(files) != 1:
+            print('error: failed to guess the default config file. ' +
+                  'Run as DOMED_CONFIG_PATH=/path/to/config.json dome <command>')
+            return 1
 
-SIDES = {
-    'onemetre': {
-        'east': 'a',
-        'west': 'b',
-        'both': 'ab'
-    },
-    'rasa': {
-        'south': 'a',
-        'north': 'b',
-        'both': 'ab'
-    },
-    'nites': {
-        'south': 'b',
-        'north': 'a',
-        'both': 'ab'
-    }
-}
+        config = Config(files[0])
 
-
-SIDE_LABELS = {
-    'onemetre': {'a': ' East', 'b': ' West'},
-    'rasa': {'a': 'South', 'b': 'North'},
-    'nites': {'a': 'North', 'b': 'South'}
-}
-
-INVERT_ON_CLOSE = {
-    'onemetre': True,
-    'rasa': True,
-    'nites': False
-}
-
-def run_command(command):
-    """Prints the message associated with a status code and returns the code"""
     try:
-        ret = command()
-    except KeyboardInterrupt:
-        # ctrl-c terminates the running command
-        ret = stop()
-
-        # Report successful stop
-        if ret == 0:
-            ret = -100
+        ret = command(config, args)
     except Pyro4.errors.CommunicationError:
         ret = -101
 
     # Print message associated with error codes, except for -1 (error handled locally)
-    if ret not in (0, -1):
+    if ret not in [-1, 0]:
         print(CommandStatus.message(ret))
     sys.exit(ret)
 
 
-def print_status():
+def print_status(config, _):
     """Prints the dome status in human-readable form"""
-    with DAEMONS[DOME].connect() as dome:
+    with config.daemon.connect() as dome:
         status = dome.status()
 
     date = datetime.datetime.strptime(status['date'], '%Y-%m-%dT%H:%M:%SZ')
     heartbeat_date = datetime.datetime.strptime(status['heartbeat_date'], '%Y-%m-%dT%H:%M:%SZ')
-    eng_mode = FMT_RED + 'ENABLED' if status['engineering_mode'] else FMT_GREEN + 'DISABLED'
-    siren_mode = FMT_GREEN + 'ENABLED' if status['heartbeat_siren'] else FMT_RED + 'DISABLED'
+    eng_mode = TFmt.Red + 'ENABLED' if status['engineering_mode'] else TFmt.Green + 'DISABLED'
+    siren_mode = TFmt.Green + 'ENABLED' if status['heartbeat_siren'] else TFmt.Red + 'DISABLED'
 
-    print('Dome status at: {0}'.format(FMT_BOLD + str(date) + FMT_CLEAR))
-    print(' {} shutter: {}'.format(SIDE_LABELS[DOME]['a'], DomeShutterStatus.label(status['shutter_a'])))
-    print(' {} shutter: {}'.format(SIDE_LABELS[DOME]['b'], DomeShutterStatus.label(status['shutter_b'])))
-    print('     Eng. mode: {}'.format(FMT_BOLD + eng_mode + FMT_CLEAR))
-    print('Heartbeat status at: {0}'.format(FMT_BOLD + str(heartbeat_date) + FMT_CLEAR))
+    print('Dome status at: {0}'.format(TFmt.Bold + str(date) + TFmt.Clear))
+    print(' {} shutter: {}'.format(config.side_labels['a'], DomeShutterStatus.label(status['shutter_a'])))
+    print(' {} shutter: {}'.format(config.side_labels['b'], DomeShutterStatus.label(status['shutter_b'])))
+    print('     Eng. mode: {}'.format(TFmt.Bold + eng_mode + TFmt.Clear))
+    print('Heartbeat status at: {0}'.format(TFmt.Bold + str(heartbeat_date) + TFmt.Clear))
     print('       Monitor: ' + DomeHeartbeatStatus.label(status['heartbeat_status']))
-    print('         Siren: ' + FMT_BOLD + siren_mode + FMT_CLEAR)
+    print('         Siren: ' + TFmt.Bold + siren_mode + TFmt.Clear)
 
     if status['heartbeat_status'] == 1:
-        print('Time remaining: {}'.format(FMT_BOLD + str(status['heartbeat_remaining']) + FMT_CLEAR))
+        print('Time remaining: {}'.format(TFmt.Bold + str(status['heartbeat_remaining']) + TFmt.Clear))
     return 0
 
 
-def stop():
+def stop(config, _):
     """Stops any active dome movement"""
-    with DAEMONS[DOME].connect() as dome:
+    with config.daemon.connect() as dome:
         return dome.stop()
 
 
-def open_dome(args):
+def open_dome(config, args):
     """Opens the dome shutters"""
     if args:
         steps = int(args[1]) if len(args) > 1 else 0
-        with DAEMONS[DOME].connect(timeout=0) as dome:
-            if args[0] in SIDES[DOME]:
-                return dome.open_shutters(SIDES[DOME][args[0]], steps=steps)
+        with config.daemon.connect(timeout=0) as dome:
+            if args[0] in config.sides:
+                return dome.open_shutters(config.sides[args[0]], steps=steps)
 
-    print('usage: {} open ({}) [<steps>]'.format(SCRIPT_NAME, '|'.join(SIDES[DOME])))
+    print('usage: {} open ({}) [<steps>]'.format(SCRIPT_NAME, '|'.join(config.sides.keys())))
     return -1
 
 
-def close_dome(args):
+def close_dome(config, args):
     """Closes the dome shutters"""
     if args:
         steps = int(args[1]) if len(args) > 1 else 0
-        with DAEMONS[DOME].connect(timeout=0) as dome:
-            if args[0] in SIDES[DOME]:
-                sides = SIDES[DOME][args[0]]
+        with config.daemon.connect(timeout=0) as dome:
+            if args[0] in config.sides:
+                sides = config.sides[args[0]]
 
                 # Reverse the shutter order when closing
-                if INVERT_ON_CLOSE[DOME]:
+                if config.invert_on_close:
                     sides = sides[::-1]
 
                 return dome.close_shutters(sides, steps=steps)
 
-    print('usage: {} close ({}) [<steps>]'.format(SCRIPT_NAME, '|'.join(SIDES[DOME])))
+    print('usage: {} close ({}) [<steps>]'.format(SCRIPT_NAME, '|'.join(config.sides.keys())))
     return -1
 
 
-def heartbeat(args):
+def heartbeat(config, args):
     """Configure the dome close heartbeat"""
     if args:
-        with DAEMONS[DOME].connect() as dome:
+        with config.daemon.connect() as dome:
             if args[0] == 'disable':
                 return dome.set_heartbeat_timer(0)
 
@@ -181,10 +136,10 @@ def heartbeat(args):
     return -1
 
 
-def engineering_mode(args):
+def engineering_mode(config, args):
     """Enable or disable engineering mode to disable dome movement"""
     if args:
-        with DAEMONS[DOME].connect() as dome:
+        with config.daemon.connect() as dome:
             if args[0] == 'disable':
                 return dome.set_engineering_mode(False)
 
@@ -195,10 +150,10 @@ def engineering_mode(args):
     return -1
 
 
-def siren(args):
+def siren(config, args):
     """Enable or disable heartbeat siren"""
     if args:
-        with DAEMONS[DOME].connect() as dome:
+        with config.daemon.connect() as dome:
             if args[0] == 'disable':
                 return dome.set_heartbeat_siren(False)
 
@@ -209,9 +164,9 @@ def siren(args):
     return -1
 
 
-def print_usage(name):
+def print_usage():
     """Prints the utility help"""
-    print('Usage: {} <command>'.format(name))
+    print('Usage: {} <command>'.format(SCRIPT_NAME))
     print()
     print('   status        print a human-readable summary of the dome status')
     print('   open          open one or both shutters')
@@ -225,24 +180,25 @@ def print_usage(name):
     return 1
 
 
+def list_sides(config, _):
+    """Prints a list of the switchable parameters"""
+    print(' '.join(config.sides.keys()))
+    return 0
+
+
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        sys.exit(print_usage(SCRIPT_NAME))
+    commands = {
+        'status': print_status,
+        'open': open_dome,
+        'close': close_dome,
+        'stop': stop,
+        'heartbeat': heartbeat,
+        'siren': siren,
+        'engineering': engineering_mode,
+        'list-sides': list_sides
+    }
 
-    if sys.argv[1] == 'status':
-        run_command(print_status)
-    elif sys.argv[1] == 'open':
-        run_command(lambda: open_dome(sys.argv[2:]))
-    elif sys.argv[1] == 'close':
-        run_command(lambda: close_dome(sys.argv[2:]))
-    elif sys.argv[1] == 'stop':
-        run_command(stop)
-    elif sys.argv[1] == 'heartbeat':
-        run_command(lambda: heartbeat(sys.argv[2:]))
-    elif sys.argv[1] == 'siren':
-        run_command(lambda: siren(sys.argv[2:]))
-    elif sys.argv[1] == 'engineering':
-        run_command(lambda: engineering_mode(sys.argv[2:]))
+    if len(sys.argv) >= 2 and sys.argv[1] in commands:
+        sys.exit(run_command(commands[sys.argv[1]], sys.argv[2:]))
 
-    # Command not found
-    sys.exit(print_usage(SCRIPT_NAME))
+    sys.exit(print_usage())

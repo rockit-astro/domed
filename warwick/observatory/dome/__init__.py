@@ -17,4 +17,4 @@
 """domed common code"""
 
 from .constants import CommandStatus, DomeShutterStatus, DomeHeartbeatStatus
-from .dome_config import DomeConfig
+from .config import Config

@@ -1,58 +1,104 @@
-## W1m/NITES/RASA dome daemon [![Travis CI build status](https://travis-ci.org/warwick-one-metre/domed.svg?branch=master)](https://travis-ci.org/warwick-one-metre/domed)
-
-Part of the observatory software for the Warwick one-meter, NITES, and RASA prototype telescopes.
+## Dome daemon
 
 `domed` communicates with the Astrohaven dome controller (PLC or legacy) attached via RS232 adaptor, and with the [dome heartbeat monitor](https://github.com/warwick-one-metre/dome-heartbeat-monitor) attached via USB.  Control is exposed via Pyro.
 
-`dome` is a commandline utility that provides access to the W1m dome.
+`dome` is a commandline utility that interfaces with the dome daemon.
 
-`python36-warwick-observatory-dome` is a python module with the common dome code.
+`python3-warwick-observatory-dome` is a python module with the common dome code.
 
-See [Software Infrastructure](https://github.com/warwick-one-metre/docs/wiki/Software-Infrastructure) for an overview of the W1m software architecture and instructions for developing and deploying the code.
+See [Software Infrastructure](https://github.com/warwick-one-metre/docs/wiki/Software-Infrastructure) for an overview of the software architecture and instructions for developing and deploying the code.
 
 Note that due to limitations in the serial protocol from the PLC there may be odd behaviours if the PLC buttons are used together with the dome daemon.
 For example, when using the hand panel the dome status will only report "Partially Open" and never "Open" because the daemon is not informed when the limits are reached.
 The serial commands may also conflict with the button commands, leading to conflicts and possible freezes. It is recommended to use one or the other, and never mix them.
 
-### Software Setup (W1m)
+### Configuration
 
-After installation, the `onemetre-dome-server` must be enabled using:
-```
-sudo systemctl enable domed.service
+Configuration is read from json files that are installed by default to `/etc/domed`.
+A configuration file is specified when launching the dome server, and the `dome` frontend will search this location when launched.
+
+```python
+{
+  "daemon": "onemetre_dome", # Run the server as this daemon. Daemon types are registered in `warwick.observatory.common.daemons`.
+  "log_name": "onemetre_dome", # The name to use when writing messages to the observatory log.
+  "control_machines": ["OneMetreDome", "OneMetreTCS"], # Machine names that are allowed to control (rather than just query) state. Machine names are registered in `warwick.observatory.common.IP`.
+  "serial_port": "/dev/dome", # Serial FIFO for communicating with the dome PLC
+  "serial_baud": 9600, # Serial baud rate (always 9600)
+  "serial_timeout": 3, # Serial comms timeout
+  "command_delay": 0.5, # Delay between sending individual open/close steps
+  "step_command_delay": 2.0, # Delay between sending "slow_open_steps" 
+  "shutter_timeout": 60, # Maximum time for opening or closing the dome
+  "has_legacy_controller": false, # Use legacy (pre-PLC) serial protocol
+  "has_bumper_guard": false, # Send bumper guard reset command before attempting to move the shutters
+  "slow_open_steps": 0, # Number of slow jerking steps to use when first opening, to reduce belt slack on the 5 shutter domes
+  "heartbeat_port": "/dev/dome-monitor", # USB FIFO for communicating with the dome heartbeat monitor
+  "heartbeat_baud": 9600, # Baud rate (always 9600)
+  "heartbeat_timeout": 3, # USB comms timeout
+  "sides": { # Mapping from side names to the PLC a/b sides.
+    "east": "a",
+    "west": "b",
+    "both": "ab"
+  },
+  "side_labels": { # Human-readable labels forthe PLC a/b sides
+    "a": " East",
+    "b": " West"
+  },
+  "invert_on_close": true # Invert ab to ba (or vice versa) when using a "close both" command
+}
 ```
 
-The service will automatically start on system boot, or you can start it immediately using:
+The FIFO device names are defined in the .rules files installed through the `-dome-data` rpm packages.
+If the physical serial port or USB adaptors change these should be updated to match.
+
+### Initial Installation
+
+The automated packaging scripts will push 4 RPM packages to the observatory package repository:
+
+| Package           | Description |
+| ----------------- | ------ |
+| observatory-dome-server | Contains the `domed` server and systemd service file. |
+| observatory-dome-client | Contains the `dome` commandline utility for controlling the dome server. |
+| python3-warwick-observatory-dome | Contains the python module with shared code. |
+| onemetre-dome-data | Contains the json configuration and udev rules for the W1m. |
+
+
+`observatory-dome-server` and `observatory-dome-client` and `onemetre-dome-data` packages should be installed on the `onemetre-dome` machine.
+
+After installing packages, the systemd service should be enabled:
+
 ```
-sudo systemctl start domed.service
+sudo systemctl enable domed@<config>
+sudo systemctl start domed@<config>
 ```
 
-Finally, open a port in the firewall so that other machines on the network can access the daemon:
+where `config` is the name of the json file for the appropriate telescope.
+
+Now open a port in the firewall:
 ```
-sudo firewall-cmd --zone=public --add-port=9004/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=<port>/tcp --permanent
 sudo firewall-cmd --reload
 ```
+where `port` is the port defined in `warwick.observatory.common.daemons` for the daemon specified in the dome config.
 
-### Software Setup (rasa)
+### Upgrading Installation
 
-After installation, the `rasa-dome-server` must be enabled using:
+New RPM packages are automatically created and pushed to the package repository for each push to the `master` branch.
+These can be upgraded locally using the standard system update procedure:
 ```
-sudo systemctl enable rasa_domed.service
-```
-
-The service will automatically start on system boot, or you can start it immediately using:
-```
-sudo systemctl start rasa_domed.service
+sudo yum clean expire-cache
+sudo yum update
 ```
 
-Finally, open a port in the firewall so that other machines on the network can access the daemon:
+The daemon should then be restarted to use the newly installed code:
 ```
-sudo firewall-cmd --zone=public --add-port=9034/tcp --permanent
-sudo firewall-cmd --reload
+sudo systemctl stop domed@<config>
+sudo systemctl start domed@<config>
 ```
 
-### Hardware Setup
+### Testing Locally
 
-The dome is expected to be connected to the physical serial port; `/dev/ttyS0` is automatically remapped to `/dev/dome`.
-If the dome is moved to a USB-RS232 adaptor then `10-onemetre-dome.rules`/`10-rasa-dome.rules` should be updated to match against the specific vendor/product/serial details.
-
-The dome monitor is matched against its unique serial number.  If the Arduino is replaced then the serial number should be updated in `10-onemetre-dome-monitor.rules`/`10-rasa-dome-monitor.rules`.
+The dome server and client can be run directly from a git clone:
+```
+./domed onemetre.json
+DOMED_CONFIG_PATH=./onemetre.json ./dome status
+```
