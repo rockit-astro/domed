@@ -10,9 +10,7 @@ _dome()
         open|close)
             opts="$(dome list-sides)"
             ;;
-        heartbeat)
-        siren)
-        engineering)
+        heartbeat|siren|engineering)
             opts="disable enable"
             ;;
     esac

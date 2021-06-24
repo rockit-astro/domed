@@ -1,5 +1,5 @@
 Name:      observatory-dome-client
-Version:   20210612
+Version:   20210624
 Release:   0
 Url:       https://github.com/warwick-one-metre/domed
 Summary:   Astrohaven dome client.
