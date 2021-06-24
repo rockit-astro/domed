@@ -50,6 +50,13 @@ def run_command(command, args):
 
     try:
         ret = command(config, args)
+    except KeyboardInterrupt:
+        # ctrl-c terminates the running command
+        ret = stop(config, args)
+
+        # Report successful stop
+        if ret == 0:
+            ret = -100
     except Pyro4.errors.CommunicationError:
         ret = -101
 
