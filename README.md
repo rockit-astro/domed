@@ -52,7 +52,7 @@ If the physical serial port or USB adaptors change these should be updated to ma
 
 ### Initial Installation
 
-The automated packaging scripts will push 4 RPM packages to the observatory package repository:
+The automated packaging scripts will push 5 RPM packages to the observatory package repository:
 
 | Package           | Description |
 | ----------------- | ------ |
@@ -60,9 +60,10 @@ The automated packaging scripts will push 4 RPM packages to the observatory pack
 | observatory-dome-client | Contains the `dome` commandline utility for controlling the dome server. |
 | python3-warwick-observatory-dome | Contains the python module with shared code. |
 | onemetre-dome-data | Contains the json configuration and udev rules for the W1m. |
-
+| clasp-dome-data | Contains the json configuration and udev rules for the CLASP telescope. |
 
 `observatory-dome-server` and `observatory-dome-client` and `onemetre-dome-data` packages should be installed on the `onemetre-dome` machine.
+`observatory-dome-server` and `observatory-dome-client` and `clasp-dome-data` packages should be installed on the `clasp-tcs` machine.
 
 After installing packages, the systemd service should be enabled:
 

@@ -1,8 +1,8 @@
 {
-  "daemon": "nites_dome",
-  "log_name": "nites_dome",
-  "control_machines": ["NitesMain"],
-  "serial_port": "COM3",
+  "daemon": "clasp_dome",
+  "log_name": "dome@clasp",
+  "control_machines": ["CLASPTCS"],
+  "serial_port": "/dev/dome",
   "serial_baud": 9600,
   "serial_timeout": 3,
   "command_delay": 0.25,
@@ -11,7 +11,7 @@
   "has_legacy_controller": false,
   "has_bumper_guard": false,
   "slow_open_steps": 0,
-  "heartbeat_port": "COM4",
+  "heartbeat_port": "/dev/dome-monitor",
   "heartbeat_baud": 9600,
   "heartbeat_timeout": 3,
   "sides": {
