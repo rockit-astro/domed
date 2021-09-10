@@ -523,10 +523,13 @@ class DomeDaemon:
                 'date': date,
                 'shutter_a': self._shutter_a,
                 'shutter_b': self._shutter_b,
+                'shutter_a_label': DomeShutterStatus.label(self._shutter_a),
+                'shutter_b_label': DomeShutterStatus.label(self._shutter_b),
                 'closed': closed,
                 'engineering_mode': self._engineering_mode,
                 'heartbeat_date': heartbeat_date,
                 'heartbeat_status': self._heartbeat_status,
+                'heartbeat_status_label': DomeHeartbeatStatus.label(self._heartbeat_status),
                 'heartbeat_remaining': self._heartbeat_time_remaining,
                 'heartbeat_siren': self._heartbeat_siren_enabled
             }

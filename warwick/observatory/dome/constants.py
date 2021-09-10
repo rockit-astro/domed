@@ -18,6 +18,7 @@
 
 from warwick.observatory.common import TFmt
 
+
 class CommandStatus:
     """Numeric return codes"""
     # General error codes
@@ -63,20 +64,37 @@ class DomeShutterStatus:
     Closed, Open, PartiallyOpen, Opening, Closing, HeartbeatMonitorForceClosing = range(6)
 
     _labels = {
-        0: TFmt.Red + TFmt.Bold + 'CLOSED' + TFmt.Clear,
-        1: TFmt.Green + TFmt.Bold + 'OPEN' + TFmt.Clear,
-        2: TFmt.Cyan + TFmt.Bold + 'PARTIALLY OPEN' + TFmt.Clear,
-        3: TFmt.Yellow + TFmt.Bold + 'OPENING' + TFmt.Clear,
-        4: TFmt.Yellow + TFmt.Bold + 'CLOSING' + TFmt.Clear,
-        5: TFmt.Red + TFmt.Bold + 'FORCE CLOSING' + TFmt.Clear,
+        0: 'CLOSED',
+        1: 'OPEN',
+        2: 'PARTIALLY OPEN',
+        3: 'OPENING',
+        4: 'CLOSING',
+        5: 'FORCE CLOSING',
+    }
+
+    _formats = {
+        0: TFmt.Red + TFmt.Bold,
+        1: TFmt.Green + TFmt.Bold,
+        2: TFmt.Cyan + TFmt.Bold,
+        3: TFmt.Yellow + TFmt.Bold,
+        4: TFmt.Yellow + TFmt.Bold,
+        5: TFmt.Red + TFmt.Bold,
     }
 
     @classmethod
-    def label(cls, status):
-        """Returns a human readable string describing an error code"""
+    def label(cls, status, formatting=False):
+        """
+        Returns a human readable string describing a status
+        Set formatting=true to enable terminal formatting characters
+        """
+        if formatting:
+            if status in cls._formats and status in cls._formats:
+                return cls._formats[status] + cls._labels[status] + TFmt.Clear
+            return TFmt.Red + TFmt.Bold + 'UNKNOWN' + TFmt.Clear
+
         if status in cls._labels:
             return cls._labels[status]
-        return TFmt.Red + TFmt.Bold + 'UNKNOWN STATUS' + TFmt.Clear
+        return 'UNKNOWN'
 
 
 class DomeHeartbeatStatus:
@@ -84,16 +102,32 @@ class DomeHeartbeatStatus:
     Disabled, Active, TrippedClosing, TrippedIdle, Unavailable = range(5)
 
     _labels = {
-        0: TFmt.Bold + 'DISABLED' + TFmt.Clear,
-        1: TFmt.Green + TFmt.Bold + 'ACTIVE' + TFmt.Clear,
-        2: TFmt.Red + TFmt.Bold + 'CLOSING DOME' + TFmt.Clear,
-        3: TFmt.Red + TFmt.Bold + 'TRIPPED' + TFmt.Clear,
-        4: TFmt.Yellow + TFmt.Bold + 'UNAVAILABLE' + TFmt.Clear,
+        0: 'DISABLED',
+        1: 'ACTIVE',
+        2: 'CLOSING DOME',
+        3: 'TRIPPED',
+        4: 'UNAVAILABLE',
+    }
+
+    _formats = {
+        0: TFmt.Bold,
+        1: TFmt.Green + TFmt.Bold,
+        2: TFmt.Red + TFmt.Bold,
+        3: TFmt.Red + TFmt.Bold,
+        4: TFmt.Yellow + TFmt.Bold,
     }
 
     @classmethod
-    def label(cls, status):
-        """Returns a human readable string describing an error code"""
+    def label(cls, status, formatting=False):
+        """
+        Returns a human readable string describing a status
+        Set formatting=true to enable terminal formatting characters
+        """
+        if formatting:
+            if status in cls._formats and status in cls._formats:
+                return cls._formats[status] + cls._labels[status] + TFmt.Clear
+            return TFmt.Red + TFmt.Bold + 'UNKNOWN' + TFmt.Clear
+
         if status in cls._labels:
             return cls._labels[status]
-        return TFmt.Red + TFmt.Bold + 'UNKNOWN STATUS' + TFmt.Clear
+        return 'UNKNOWN'
