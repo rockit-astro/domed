@@ -1,12 +1,12 @@
 Name:      observatory-dome-server
-Version:   20210910
+Version:   20220726
 Release:   0
 Url:       https://github.com/warwick-one-metre/domed
 Summary:   Astrohaven dome server.
 License:   GPL-3.0
 Group:     Unspecified
 BuildArch: noarch
-Requires:  python3, python3-Pyro4, python3-pyserial, python3-warwick-observatory-common, python3-warwick-observatory-dome, %{?systemd_requires}
+Requires:  python3 python3-Pyro4 python3-pyserial python3-warwick-observatory-common python3-warwick-observatory-dome
 
 %description
 
