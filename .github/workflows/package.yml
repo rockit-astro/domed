@@ -37,6 +37,7 @@ jobs:
           rocky-packages/set-spec-release.sh python3-warwick-observatory-dome.spec
           rocky-packages/set-spec-release.sh onemetre-dome-data.spec
           rocky-packages/set-spec-release.sh clasp-dome-data.spec
+          rocky-packages/set-spec-release.sh superwasp-dome-data.spec
 
       - name: Package RPMs
         run:

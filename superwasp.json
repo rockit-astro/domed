@@ -1,0 +1,27 @@
+{
+  "daemon": "superwasp_dome",
+  "log_name": "superwasp_dome",
+  "control_machines": ["SWASPTCS"],
+  "serial_port": "/dev/ttyS0",
+  "serial_baud": 9600,
+  "serial_timeout": 3,
+  "command_delay": 0.25,
+  "step_command_delay": 0.25,
+  "shutter_timeout": 19,
+  "has_legacy_controller": true,
+  "has_bumper_guard": false,
+  "slow_open_steps": 0,
+  "heartbeat_port": "/dev/dome-monitor",
+  "heartbeat_baud": 9600,
+  "heartbeat_timeout": 3,
+  "sides": {
+    "north": "b",
+    "south": "a",
+    "both": "ab"
+  },
+  "side_labels": {
+    "b": "North",
+    "a": "South"
+  },
+  "invert_on_close": true
+}

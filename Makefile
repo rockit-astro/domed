@@ -11,5 +11,6 @@ all:
 	${RPMBUILD} -ba python3-warwick-observatory-dome.spec
 	${RPMBUILD} -ba onemetre-dome-data.spec
 	${RPMBUILD} -ba clasp-dome-data.spec
+	${RPMBUILD} -ba superwasp-dome-data.spec
 	mv build/noarch/*.rpm .
 	rm -rf build
