@@ -1,6 +1,9 @@
 [TYPECHECK]
 ignored-modules = astropy.units
-disable = broad-except, too-few-public-methods, missing-docstring, invalid-name
+disable = broad-except, too-few-public-methods, missing-docstring, invalid-name, too-many-branches, too-many-return-statements
+
+[MASTER]
+extension-pkg-whitelist = sep
 
 [SIMILARITIES]
 min-similarity-lines = 25
@@ -12,5 +15,5 @@ max-line-length=120
 [DESIGN]
 max-args = 10
 max-locals = 50
-max-attributes = 15
+max-attributes = 25
 max-statements = 100

@@ -97,7 +97,9 @@ class DomeDaemon:
                     # The older non-PLC controllers will only return A/B/X/Y status bytes in
                     # response to an issued move command. We therefore need to try closing a
                     # step to find out where the shutters are now
-                    step_once = lambda s: True
+                    def step_once(_):
+                        return True
+
                     self.__move_shutter('A', step_once, self._config.command_delay_seconds, 0)
                     self.__move_shutter('B', step_once, self._config.command_delay_seconds, 0)
 
@@ -109,8 +111,7 @@ class DomeDaemon:
                         if self._config.legacy_controller:
                             # Legacy controllers only send data in response to a move command
                             continue
-                        else:
-                            raise serial.SerialTimeoutException('Dome serial read timeout')
+                        raise serial.SerialTimeoutException('Dome serial read timeout')
 
                     with self._status_lock:
                         self.__parse_status(data[0])
@@ -237,7 +238,9 @@ class DomeDaemon:
                                 # it is closing the dome, so we don't know for sure what the current
                                 # status of the dome is now. Issue another close step so that we can
                                 # receive a new status update
-                                step_once = lambda s: True
+                                def step_once(_):
+                                    return True
+
                                 self.__move_shutter('A', step_once,
                                                     self._config.command_delay_seconds, 0)
                                 self.__move_shutter('B', step_once,
@@ -300,8 +303,8 @@ class DomeDaemon:
                 log.error(self._config.log_name, 'Failed to send serial command (' + str(exception) + ')')
             time.sleep(step_delay)
             runtime = (datetime.datetime.utcnow() - start_time).total_seconds()
-            heartbeat_tripped = self._heartbeat_status == DomeHeartbeatStatus.TrippedClosing or \
-                self._heartbeat_status == DomeHeartbeatStatus.TrippedIdle
+            heartbeat_tripped = self._heartbeat_status in [DomeHeartbeatStatus.TrippedClosing,
+                                                           DomeHeartbeatStatus.TrippedIdle]
             at_limit = at_requested_limit(step_count)
             if self._force_stopped or heartbeat_tripped or at_limit or 0 < timeout < runtime:
                 break
