@@ -352,6 +352,11 @@ class DomeDaemon:
 
             # pylint: disable=cell-var-from-loop
             for side in sides:
+                # Already open?
+                status = self._shutter_a if side == 'a' else self._shutter_b
+                if status == DomeShutterStatus.Open:
+                    continue
+
                 # Open part way using steps
                 slow_open = steps == 0 and self._config.slow_open_steps > 0
                 if slow_open:
@@ -423,6 +428,10 @@ class DomeDaemon:
                 def at_requested_limit(s):
                     status = self._shutter_a if side == 'A' else self._shutter_b
                     return status == DomeShutterStatus.Closed or 0 < steps <= s
+
+                # Already closed?
+                if at_requested_limit(0):
+                    continue
 
                 success = success and self.__move_shutter(side, at_requested_limit, step_delay, timeout)
             # pylint: enable=cell-var-from-loop
