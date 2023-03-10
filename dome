@@ -77,10 +77,15 @@ def print_status(config, _):
     siren_mode = TFmt.Green + 'ENABLED' if status['heartbeat_siren'] else TFmt.Red + 'DISABLED'
 
     print('Dome status at: {0}'.format(TFmt.Bold + str(date) + TFmt.Clear))
-    print(' {} shutter: {}'.format(config.side_labels['a'],
-                                   DomeShutterStatus.label(status['shutter_a'], formatting=True)))
-    print(' {} shutter: {}'.format(config.side_labels['b'],
-                                   DomeShutterStatus.label(status['shutter_b'], formatting=True)))
+    for side in ['a', 'b']:
+        side_label = f' {config.side_labels[side]} shutter: ' + \
+                DomeShutterStatus.label(status[f'shutter_{side}'], formatting=True)
+        if f'belt_{side}_tensioned' in status:
+            belt_label = TFmt.Green + 'TENSIONED' if status[f'belt_{side}_tensioned'] else TFmt.Red + 'SLACK'
+            side_label += f' (belt {TFmt.Bold}{belt_label}{TFmt.Clear})'
+
+        print(side_label)
+
     print('     Eng. mode: {}'.format(TFmt.Bold + eng_mode + TFmt.Clear))
     print('Heartbeat status at: {0}'.format(TFmt.Bold + str(heartbeat_date) + TFmt.Clear))
     print('       Monitor: ' + DomeHeartbeatStatus.label(status['heartbeat_status'], formatting=True))
@@ -88,6 +93,7 @@ def print_status(config, _):
 
     if status['heartbeat_status'] == 1:
         print('Time remaining: {}'.format(TFmt.Bold + str(status['heartbeat_remaining']) + TFmt.Clear))
+
     return 0
 
 

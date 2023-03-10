@@ -1,5 +1,5 @@
 Name:           python3-warwick-observatory-dome
-Version:        20210910
+Version:        20230310
 Release:        0
 License:        GPL3
 Summary:        Common backend code for dome daemon.

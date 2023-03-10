@@ -23,5 +23,10 @@
     "a": "North",
     "b": "South"
   },
-  "invert_on_close": false
+  "invert_on_close": false,
+  "domealert_daemon": "clasp_domealert",
+  "domealert_belt_sensors": {
+    "a": "north_belt_tensioned",
+    "b": "south_belt_tensioned"
+  }
 }

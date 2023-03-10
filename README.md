@@ -43,7 +43,12 @@ A configuration file is specified when launching the dome server, and the `dome`
     "a": " East",
     "b": " West"
   },
-  "invert_on_close": true # Invert ab to ba (or vice versa) when using a "close both" command
+  "invert_on_close": true, # Invert ab to ba (or vice versa) when using a "close both" command
+  "domealert_daemon": "onemetre_domealert", # [optional] Domealert daemon to check belt tension when opening
+  "domealert_belt_sensors": { # [optional] Domealert sensor names for the belt tension on each side
+    "a": "east_belt_tensioned",
+    "b": "west_belt_tensioned"
+  }
 }
 ```
 

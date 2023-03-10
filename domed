@@ -360,18 +360,48 @@ class DomeDaemon:
                 # Open part way using steps
                 slow_open = steps == 0 and self._config.slow_open_steps > 0
                 if slow_open:
-                    def at_step_limit(s):
-                        status = self._shutter_a if side == 'a' else self._shutter_b
-                        return status == DomeShutterStatus.Open or s >= self._config.slow_open_steps
-
                     slow_delay = self._config.step_command_delay_seconds
-                    success = success and self.__move_shutter(side, at_step_limit, slow_delay, 0)
 
-                def at_requested_limit(s):
-                    status = self._shutter_a if side == 'a' else self._shutter_b
-                    return status == DomeShutterStatus.Open or 0 < steps <= s
+                    if self._config.domealert_belt_sensors[side]:
+                        with self._config.domealert_daemon.connect() as domealert:
+                            def at_step_limit(s):
+                                status = self._shutter_a if side == 'a' else self._shutter_b
+                                belt_tensioned = domealert.last_measurement()[self._config.domealert_belt_sensors[side]]
+                                return status == DomeShutterStatus.Open or not belt_tensioned \
+                                    or s >= self._config.slow_open_steps
 
-                success = success and self.__move_shutter(side, at_requested_limit, step_delay, timeout, not slow_open)
+                            success = success and self.__move_shutter(side, at_step_limit, slow_delay, 0)
+                            belt_tensioned = domealert.last_measurement()[self._config.domealert_belt_sensors[side]]
+                            if not belt_tensioned:
+                                log.error(self._config.log_name, f'{self._config.side_labels[side]} belt is slack!')
+                                success = False
+                    else:
+                        def at_step_limit(s):
+                            status = self._shutter_a if side == 'a' else self._shutter_b
+                            return status == DomeShutterStatus.Open or s >= self._config.slow_open_steps
+
+                        success = success and self.__move_shutter(side, at_step_limit, slow_delay, 0)
+
+                if self._config.domealert_belt_sensors[side]:
+                    with self._config.domealert_daemon.connect() as domealert:
+                        def at_requested_limit(s):
+                            status = self._shutter_a if side == 'a' else self._shutter_b
+                            belt_tensioned = domealert.last_measurement()[self._config.domealert_belt_sensors[side]]
+                            return status == DomeShutterStatus.Open or not belt_tensioned or 0 < steps <= s
+
+                        success = success and self.__move_shutter(side, at_requested_limit, step_delay, timeout,
+                                                                  not slow_open)
+                        belt_tensioned = domealert.last_measurement()[self._config.domealert_belt_sensors[side]]
+                        if not belt_tensioned:
+                            log.error(self._config.log_name, f'{self._config.side_labels[side]} belt is slack!')
+                            success = False
+                else:
+                    def at_requested_limit(s):
+                        status = self._shutter_a if side == 'a' else self._shutter_b
+                        return status == DomeShutterStatus.Open or 0 < steps <= s
+
+                    success = success and self.__move_shutter(side, at_requested_limit, step_delay, timeout,
+                                                              not slow_open)
             # pylint: enable=cell-var-from-loop
 
             if not success:
@@ -528,7 +558,7 @@ class DomeDaemon:
             closed = self._shutter_a == DomeShutterStatus.Closed and \
                 self._shutter_b == DomeShutterStatus.Closed
 
-            return {
+            status = {
                 'date': date,
                 'shutter_a': self._shutter_a,
                 'shutter_b': self._shutter_b,
@@ -542,6 +572,15 @@ class DomeDaemon:
                 'heartbeat_remaining': self._heartbeat_time_remaining,
                 'heartbeat_siren': self._heartbeat_siren_enabled
             }
+
+            if self._config.domealert_daemon:
+                with self._config.domealert_daemon.connect() as domealert:
+                    domealert_status = domealert.last_measurement()
+                    for side, sensor in self._config.domealert_belt_sensors.items():
+                        if sensor:
+                            status[f'belt_{side}_tensioned'] = domealert_status[sensor]
+
+            return status
 
 
 if __name__ == '__main__':

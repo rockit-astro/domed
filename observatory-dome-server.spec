@@ -1,5 +1,5 @@
 Name:      observatory-dome-server
-Version:   20220726
+Version:   20230310
 Release:   0
 Url:       https://github.com/warwick-one-metre/domed
 Summary:   Astrohaven dome server.

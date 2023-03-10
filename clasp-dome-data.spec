@@ -1,5 +1,5 @@
 Name:      clasp-dome-data
-Version:   20210624
+Version:   20230310
 Release:   0
 Url:       https://github.com/warwick-one-metre/domed
 Summary:   Dome configuration for the CLASP telescope.

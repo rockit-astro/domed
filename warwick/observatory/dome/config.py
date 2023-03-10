@@ -108,6 +108,21 @@ CONFIG_SCHEMA = {
         },
         'invert_on_close': {
             'type': 'boolean'
+        },
+        'domealert_daemon': {
+            'type': 'string',
+            'daemon_name': True
+        },
+        'domealert_belt_sensors': {
+            'type': 'object',
+            'properties': {
+                'a': {
+                    'type': 'string'
+                },
+                'b': {
+                    'type': 'string'
+                }
+            }
         }
     }
 }
@@ -144,3 +159,15 @@ class Config:
         self.sides = config_json['sides']
         self.side_labels = config_json['side_labels']
         self.invert_on_close = config_json['invert_on_close']
+
+        self.domealert_daemon = None
+        self.domealert_belt_sensors = {
+            'a': None,
+            'b': None
+        }
+
+        if 'domealert_daemon' in config_json:
+            self.domealert_daemon = getattr(daemons, config_json['domealert_daemon'])
+            if 'domealert_belt_sensors' in config_json:
+                for side in ['a', 'b']:
+                    self.domealert_belt_sensors[side] = config_json['domealert_belt_sensors'].get(side, None)
