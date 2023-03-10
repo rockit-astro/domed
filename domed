@@ -336,8 +336,7 @@ class DomeDaemon:
             if 'a' in sides and 'b' in sides:
                 log.info(self._config.log_name, 'Opening both shutters')
             else:
-                shutter = 'east' if 'a' in sides else 'west'
-                log.info(self._config.log_name, 'Opening ' + shutter + ' shutter')
+                log.info(self._config.log_name, f'Opening {self._config.side_labels[sides]} shutter')
 
             success = True
 
@@ -439,8 +438,7 @@ class DomeDaemon:
             if 'A' in sides and 'B' in sides:
                 log.info(self._config.log_name, 'Closing both shutters')
             else:
-                shutter = 'east' if 'A' in sides else 'west'
-                log.info(self._config.log_name, 'Closing ' + shutter + ' shutter')
+                log.info(self._config.log_name, f'Closing {self._config.side_labels[sides.lower()]} shutter')
 
             success = True
 
