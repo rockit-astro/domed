@@ -76,7 +76,7 @@ def print_status(config, _):
     eng_mode = TFmt.Red + 'ENABLED' if status['engineering_mode'] else TFmt.Green + 'DISABLED'
     siren_mode = TFmt.Green + 'ENABLED' if status['heartbeat_siren'] else TFmt.Red + 'DISABLED'
 
-    print('Dome status at: {0}'.format(TFmt.Bold + str(date) + TFmt.Clear))
+    print(f'Dome status at {TFmt.Bold}{date}{TFmt.Clear}:')
     for side in ['a', 'b']:
         side_label = f' {config.side_labels[side]} shutter: ' + \
                 DomeShutterStatus.label(status[f'shutter_{side}'], formatting=True)
@@ -86,13 +86,13 @@ def print_status(config, _):
 
         print(side_label)
 
-    print('     Eng. mode: {}'.format(TFmt.Bold + eng_mode + TFmt.Clear))
-    print('Heartbeat status at: {0}'.format(TFmt.Bold + str(heartbeat_date) + TFmt.Clear))
+    print(f'     Eng. mode: {TFmt.Bold}{eng_mode}{TFmt.Clear}')
+    print(f'Heartbeat status at {TFmt.Bold}{heartbeat_date}{TFmt.Clear}:')
     print('       Monitor: ' + DomeHeartbeatStatus.label(status['heartbeat_status'], formatting=True))
     print('         Siren: ' + TFmt.Bold + siren_mode + TFmt.Clear)
 
     if status['heartbeat_status'] == 1:
-        print('Time remaining: {}'.format(TFmt.Bold + str(status['heartbeat_remaining']) + TFmt.Clear))
+        print(f'Time remaining: {TFmt.Bold}{status["heartbeat_remaining"]}{TFmt.Clear}')
 
     return 0
 
@@ -111,7 +111,7 @@ def open_dome(config, args):
             if args[0] in config.sides:
                 return dome.open_shutters(config.sides[args[0]], steps=steps)
 
-    print('usage: {} open ({}) [<steps>]'.format(SCRIPT_NAME, '|'.join(config.sides.keys())))
+    print(f'usage: {SCRIPT_NAME} open ({"|".join(config.sides.keys())}) [<steps>]')
     return -1
 
 
@@ -129,7 +129,7 @@ def close_dome(config, args):
 
                 return dome.close_shutters(sides, steps=steps)
 
-    print('usage: {} close ({}) [<steps>]'.format(SCRIPT_NAME, '|'.join(config.sides.keys())))
+    print(f'usage: {SCRIPT_NAME} close ({"|".join(config.sides.keys())}) [<steps>]')
     return -1
 
 
@@ -145,9 +145,9 @@ def heartbeat(config, args):
                     timeout = int(args[1])
                     if timeout > 0:
                         return dome.set_heartbeat_timer(timeout)
-            print('usage: {} heartbeat enable <timeout in seconds>'.format(SCRIPT_NAME))
+            print(f'usage: {SCRIPT_NAME} heartbeat enable <timeout in seconds>')
             return -1
-    print('usage: {} heartbeat (disable|enable)'.format(SCRIPT_NAME))
+    print(f'usage: {SCRIPT_NAME} heartbeat (disable|enable)')
     return -1
 
 
@@ -161,7 +161,7 @@ def engineering_mode(config, args):
             if args[0] == 'enable':
                 return dome.set_engineering_mode(True)
 
-    print('usage: {} engineering (disable|enable)'.format(SCRIPT_NAME))
+    print(f'usage: {SCRIPT_NAME} engineering (disable|enable)')
     return -1
 
 
@@ -175,13 +175,13 @@ def siren(config, args):
             if args[0] == 'enable':
                 return dome.set_heartbeat_siren(True)
 
-    print('usage: {} siren (disable|enable)'.format(SCRIPT_NAME))
+    print(f'usage: {SCRIPT_NAME} siren (disable|enable)')
     return -1
 
 
 def print_usage():
     """Prints the utility help"""
-    print('Usage: {} <command>'.format(SCRIPT_NAME))
+    print(f'Usage: {SCRIPT_NAME} <command>')
     print()
     print('   status        print a human-readable summary of the dome status')
     print('   open          open one or both shutters')

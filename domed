@@ -176,7 +176,7 @@ class DomeDaemon:
             print('Bumper guard relay reset')
             log.error(self._config.log_name, 'Bumper guard relay reset')
         else:
-            print('Unknown status code: {0}'.format(status))
+            print(f'Unknown status code: {status}')
             log.error(self._config.log_name, 'Unknown dome status code ' + str(status))
 
     def __monitor_heartbeat(self):
