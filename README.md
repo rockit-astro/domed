@@ -1,12 +1,8 @@
 ## Dome daemon
 
-`domed` communicates with the Astrohaven dome controller (PLC or legacy) attached via RS232 adaptor, and with the [dome heartbeat monitor](https://github.com/warwick-one-metre/dome-heartbeat-monitor) attached via USB.  Control is exposed via Pyro.
+`domed` communicates with the Astrohaven dome controller (PLC or legacy) attached via RS232 adaptor, and with the [dome heartbeat monitor](https://github.com/rockit-astro/dome-heartbeat-monitor) attached via USB.  Control is exposed via Pyro.
 
 `dome` is a commandline utility that interfaces with the dome daemon.
-
-`python3-warwick-observatory-dome` is a python module with the common dome code.
-
-See [Software Infrastructure](https://github.com/warwick-one-metre/docs/wiki/Software-Infrastructure) for an overview of the software architecture and instructions for developing and deploying the code.
 
 Note that due to limitations in the serial protocol from the PLC there may be odd behaviours if the PLC buttons are used together with the dome daemon.
 For example, when using the hand panel the dome status will only report "Partially Open" and never "Open" because the daemon is not informed when the limits are reached.
@@ -19,9 +15,9 @@ A configuration file is specified when launching the dome server, and the `dome`
 
 ```python
 {
-  "daemon": "onemetre_dome", # Run the server as this daemon. Daemon types are registered in `warwick.observatory.common.daemons`.
+  "daemon": "onemetre_dome", # Run the server as this daemon. Daemon types are registered in `rockit.common.daemons`.
   "log_name": "onemetre_dome", # The name to use when writing messages to the observatory log.
-  "control_machines": ["OneMetreDome", "OneMetreTCS"], # Machine names that are allowed to control (rather than just query) state. Machine names are registered in `warwick.observatory.common.IP`.
+  "control_machines": ["OneMetreDome", "OneMetreTCS"], # Machine names that are allowed to control (rather than just query) state. Machine names are registered in `rockit.common.IP`.
   "serial_port": "/dev/dome", # Serial FIFO for communicating with the dome PLC
   "serial_baud": 9600, # Serial baud rate (always 9600)
   "serial_timeout": 3, # Serial comms timeout
@@ -57,24 +53,21 @@ If the physical serial port or USB adaptors change these should be updated to ma
 
 ### Initial Installation
 
-The automated packaging scripts will push 5 RPM packages to the observatory package repository:
+The automated packaging scripts will push 6 RPM packages to the observatory package repository:
 
-| Package           | Description |
-| ----------------- | ------ |
-| observatory-dome-server | Contains the `domed` server and systemd service file. |
-| observatory-dome-client | Contains the `dome` commandline utility for controlling the dome server. |
-| python3-warwick-observatory-dome | Contains the python module with shared code. |
-| onemetre-dome-data | Contains the json configuration and udev rules for the W1m. |
-| clasp-dome-data | Contains the json configuration and udev rules for the CLASP telescope. |
-
-`observatory-dome-server` and `observatory-dome-client` and `onemetre-dome-data` packages should be installed on the `onemetre-dome` machine.
-`observatory-dome-server` and `observatory-dome-client` and `clasp-dome-data` packages should be installed on the `clasp-tcs` machine.
+| Package                    | Description                                                                 |
+|----------------------------|-----------------------------------------------------------------------------|
+| rockit-dome-server         | Contains the `domed` server and systemd service file.                       |
+| rockit-dome-client         | Contains the `dome` commandline utility for controlling the dome server.    |
+| rockit-dome-data-onemetre  | Contains the json configuration and udev rules for the W1m.                 |
+| rockit-dome-data-clasp     | Contains the json configuration and udev rules for the CLASP telescope.     |
+| rockit-dome-data-superwasp | Contains the json configuration and udev rules for the SuperWASP telescope. |
+| python3-rockit-dome        | Contains the python module with shared code.                                |
 
 After installing packages, the systemd service should be enabled:
 
 ```
-sudo systemctl enable domed@<config>
-sudo systemctl start domed@<config>
+sudo systemctl enable --now domed@<config>
 ```
 
 where `config` is the name of the json file for the appropriate telescope.
@@ -84,7 +77,7 @@ Now open a port in the firewall:
 sudo firewall-cmd --zone=public --add-port=<port>/tcp --permanent
 sudo firewall-cmd --reload
 ```
-where `port` is the port defined in `warwick.observatory.common.daemons` for the daemon specified in the dome config.
+where `port` is the port defined in `rockit.common.daemons` for the daemon specified in the dome config.
 
 ### Upgrading Installation
 
@@ -97,14 +90,13 @@ sudo yum update
 
 The daemon should then be restarted to use the newly installed code:
 ```
-sudo systemctl stop domed@<config>
-sudo systemctl start domed@<config>
+sudo systemctl restart domed@<config>
 ```
 
 ### Testing Locally
 
 The dome server and client can be run directly from a git clone:
 ```
-./domed onemetre.json
-DOMED_CONFIG_PATH=./onemetre.json ./dome status
+./domed config/onemetre.json
+DOMED_CONFIG_PATH=./config/onemetre.json ./dome status
 ```
