@@ -55,14 +55,14 @@ If the physical serial port or USB adaptors change these should be updated to ma
 
 The automated packaging scripts will push 6 RPM packages to the observatory package repository:
 
-| Package                    | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| rockit-dome-server         | Contains the `domed` server and systemd service file.                       |
-| rockit-dome-client         | Contains the `dome` commandline utility for controlling the dome server.    |
-| rockit-dome-data-onemetre  | Contains the json configuration and udev rules for the W1m.                 |
-| rockit-dome-data-clasp     | Contains the json configuration and udev rules for the CLASP telescope.     |
-| rockit-dome-data-superwasp | Contains the json configuration and udev rules for the SuperWASP telescope. |
-| python3-rockit-dome        | Contains the python module with shared code.                                |
+| Package                   | Description                                                               |
+|---------------------------|---------------------------------------------------------------------------|
+| rockit-dome-server        | Contains the `domed` server and systemd service file.                     |
+| rockit-dome-client        | Contains the `dome` commandline utility for controlling the dome server.  |
+| rockit-dome-data-onemetre | Contains the json configuration and udev rules for the W1m.               |
+| rockit-dome-data-clasp    | Contains the json configuration and udev rules for the CLASP telescope.   |
+| rockit-dome-data-sting    | Contains the json configuration and udev rules for the STING telescope.   |
+| python3-rockit-dome       | Contains the python module with shared code.                              |
 
 After installing packages, the systemd service should be enabled:
 

@@ -1,7 +1,7 @@
 {
-  "daemon": "superwasp_dome",
-  "log_name": "superwasp_dome",
-  "control_machines": ["SWASPTCS"],
+  "daemon": "sting_dome",
+  "log_name": "sting_dome",
+  "control_machines": ["STINGTCS"],
   "serial_port": "/dev/ttyS0",
   "serial_baud": 9600,
   "serial_timeout": 3,

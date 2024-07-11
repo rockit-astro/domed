@@ -23,10 +23,10 @@ mkdir -p %{buildroot}%{_udevrulesdir}
 
 %{__install} %{_sourcedir}/config/10-clasp-dome.rules %{buildroot}%{_udevrulesdir}
 %{__install} %{_sourcedir}/config/10-onemetre-dome.rules %{buildroot}%{_udevrulesdir}
-%{__install} %{_sourcedir}/config/10-superwasp-dome.rules %{buildroot}%{_udevrulesdir}
+%{__install} %{_sourcedir}/config/10-sting-dome.rules %{buildroot}%{_udevrulesdir}
 %{__install} %{_sourcedir}/config/clasp.json %{buildroot}%{_sysconfdir}/domed/
 %{__install} %{_sourcedir}/config/onemetre.json %{buildroot}%{_sysconfdir}/domed/
-%{__install} %{_sourcedir}/config/superwasp.json %{buildroot}%{_sysconfdir}/domed/
+%{__install} %{_sourcedir}/config/sting.json %{buildroot}%{_sysconfdir}/domed/
 
 %package server
 Summary:  Astrohaven dome server
@@ -71,14 +71,14 @@ Group:   Unspecified
 %{_sysconfdir}/domed/onemetre.json
 %{_udevrulesdir}/10-onemetre-dome.rules
 
-%package data-superwasp
-Summary: Dome configuration for the SuperWASP telescope
+%package data-sting
+Summary: Dome configuration for the STING telescope
 Group:   Unspecified
-%description data-superwasp
+%description data-sting
 
-%files data-superwasp
+%files data-sting
 %defattr(0644,root,root,-)
-%{_sysconfdir}/domed/superwasp.json
-%{_udevrulesdir}/10-superwasp-dome.rules
+%{_sysconfdir}/domed/sting.json
+%{_udevrulesdir}/10-sting-dome.rules
 
 %changelog
