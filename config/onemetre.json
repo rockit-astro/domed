@@ -1,7 +1,7 @@
 {
   "daemon": "onemetre_dome",
   "log_name": "onemetre_dome",
-  "control_machines": ["OneMetreDome", "OneMetreTCS"],
+  "control_machines": ["OneMetreDome", "OneMetreTCS", "OneMetreDAS"],
   "serial_port": "/dev/dome",
   "serial_baud": 9600,
   "serial_timeout": 3,
