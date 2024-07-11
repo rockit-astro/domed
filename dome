@@ -27,7 +27,7 @@ from rockit.dome import (
     CommandStatus,
     DomeShutterStatus,
     DomeHeartbeatStatus)
-from rockit.common import TFmt
+from rockit.common import print
 
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 sys.excepthook = Pyro4.util.excepthook
@@ -73,26 +73,26 @@ def print_status(config, _):
 
     date = datetime.datetime.strptime(status['date'], '%Y-%m-%dT%H:%M:%SZ')
     heartbeat_date = datetime.datetime.strptime(status['heartbeat_date'], '%Y-%m-%dT%H:%M:%SZ')
-    eng_mode = TFmt.Red + 'ENABLED' if status['engineering_mode'] else TFmt.Green + 'DISABLED'
-    siren_mode = TFmt.Green + 'ENABLED' if status['heartbeat_siren'] else TFmt.Red + 'DISABLED'
+    eng_mode = '[red]ENABLED[/red]' if status['engineering_mode'] else '[green]DISABLED[/green]'
+    siren_mode = '[green]ENABLED[/green]' if status['heartbeat_siren'] else '[red]DISABLED[/red]'
 
-    print(f'Dome status at {TFmt.Bold}{date}{TFmt.Clear}:')
+    print(f'Dome status at [b]{date}[/b]:')
     for side in ['a', 'b']:
         side_label = f' {config.side_labels[side]} shutter: ' + \
                 DomeShutterStatus.label(status[f'shutter_{side}'], formatting=True)
         if f'belt_{side}_tensioned' in status:
-            belt_label = TFmt.Green + 'TENSIONED' if status[f'belt_{side}_tensioned'] else TFmt.Red + 'SLACK'
-            side_label += f' (belt {TFmt.Bold}{belt_label}{TFmt.Clear})'
+            belt_label = '[green]TENSIONED[/green]' if status[f'belt_{side}_tensioned'] else '[red]SLACK[/red]'
+            side_label += f' (belt [b]{belt_label}[/b])'
 
         print(side_label)
 
-    print(f'     Eng. mode: {TFmt.Bold}{eng_mode}{TFmt.Clear}')
-    print(f'Heartbeat status at {TFmt.Bold}{heartbeat_date}{TFmt.Clear}:')
+    print(f'     Eng. mode: [b]{eng_mode}[/b]')
+    print(f'Heartbeat status at [b]{heartbeat_date}[/b]:')
     print('       Monitor: ' + DomeHeartbeatStatus.label(status['heartbeat_status'], formatting=True))
-    print('         Siren: ' + TFmt.Bold + siren_mode + TFmt.Clear)
+    print(f'         Siren: [b]{siren_mode}[/b]')
 
     if status['heartbeat_status'] == 1:
-        print(f'Time remaining: {TFmt.Bold}{status["heartbeat_remaining"]}{TFmt.Clear}')
+        print(f'Time remaining: [b]{status["heartbeat_remaining"]}[/b]')
 
     return 0
 
@@ -111,7 +111,7 @@ def open_dome(config, args):
             if args[0] in config.sides:
                 return dome.open_shutters(config.sides[args[0]], steps=steps)
 
-    print(f'usage: {SCRIPT_NAME} open ({"|".join(config.sides.keys())}) [<steps>]')
+    print(f'usage: {SCRIPT_NAME} open ({"|".join(config.sides.keys())}) \\[<steps>]')
     return -1
 
 
@@ -129,7 +129,7 @@ def close_dome(config, args):
 
                 return dome.close_shutters(sides, steps=steps)
 
-    print(f'usage: {SCRIPT_NAME} close ({"|".join(config.sides.keys())}) [<steps>]')
+    print(f'usage: {SCRIPT_NAME} close ({"|".join(config.sides.keys())}) \\[<steps>]')
     return -1
 
 
