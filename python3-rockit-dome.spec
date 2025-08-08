@@ -1,6 +1,6 @@
 Name:           python3-rockit-dome
 Version:        %{_version}
-Release:        1
+Release:        1%{dist}
 License:        GPL3
 Summary:        Coommon backend code for dome daemon.
 Url:            https://github.com/rockit-astro/domed

@@ -1,6 +1,6 @@
 Name:      rockit-dome
 Version:   %{_version}
-Release:   1
+Release:   1%{dist}
 Summary:   Astrohaven dome server
 Url:       https://github.com/rockit-astro/domed
 License:   GPL-3.0
