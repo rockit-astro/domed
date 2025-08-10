@@ -55,7 +55,7 @@ class DomeDaemon:
         self._heartbeat_port = None
         self._heartbeat_status = DomeHeartbeatStatus.Unavailable
         self._heartbeat_time_remaining = 0
-        self._heartbeat_date = datetime.datetime.utcnow()
+        self._heartbeat_date = datetime.datetime.now(datetime.timezone.utc)
         self._heartbeat_siren_enabled = True
 
         if self._config.heartbeat_port:
@@ -114,7 +114,7 @@ class DomeDaemon:
 
                     with self._status_lock:
                         self.__parse_status(data[0])
-                        self._status_time = datetime.datetime.utcnow()
+                        self._status_time = datetime.datetime.now(datetime.timezone.utc)
 
             except Exception as exception:
                 self._port.close()
@@ -226,7 +226,7 @@ class DomeDaemon:
                             self._heartbeat_status = DomeHeartbeatStatus.TrippedClosing
                             self._shutter_a = DomeShutterStatus.HeartbeatMonitorForceClosing
                             self._shutter_b = DomeShutterStatus.HeartbeatMonitorForceClosing
-                            self._status_time = datetime.datetime.utcnow()
+                            self._status_time = datetime.datetime.now(datetime.timezone.utc)
                         elif status == 255:
                             if self._heartbeat_status != DomeHeartbeatStatus.TrippedIdle:
                                 log.info(self._config.log_name,
@@ -257,7 +257,7 @@ class DomeDaemon:
                             # Heartbeat monitor represents time using half-second ticks
                             self._heartbeat_time_remaining = status / 2.
 
-                        self._heartbeat_date = datetime.datetime.utcnow()
+                        self._heartbeat_date = datetime.datetime.now(datetime.timezone.utc)
 
             except Exception as exception:
                 self._heartbeat_port.close()
@@ -290,7 +290,7 @@ class DomeDaemon:
                 log.error(self._config.log_name, 'Failed to send heartbeat serial command (' + str(exception) + ')')
 
         step_count = 0
-        start_time = datetime.datetime.utcnow()
+        start_time = datetime.datetime.now(datetime.timezone.utc)
 
         while True:
             try:
@@ -301,7 +301,7 @@ class DomeDaemon:
             except Exception as exception:
                 log.error(self._config.log_name, 'Failed to send serial command (' + str(exception) + ')')
             time.sleep(step_delay)
-            runtime = (datetime.datetime.utcnow() - start_time).total_seconds()
+            runtime = (datetime.datetime.now(datetime.timezone.utc) - start_time).total_seconds()
             heartbeat_tripped = self._heartbeat_status in [DomeHeartbeatStatus.TrippedClosing,
                                                            DomeHeartbeatStatus.TrippedIdle]
             at_limit = at_requested_limit(step_count)
