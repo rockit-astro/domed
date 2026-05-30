@@ -2,7 +2,7 @@
   "daemon": "sting_dome",
   "log_name": "sting_dome",
   "control_machines": ["STINGTCS"],
-  "serial_port": "/dev/ttyS0",
+  "serial_port": "/dev/dome",
   "serial_baud": 9600,
   "serial_timeout": 3,
   "command_delay": 0.25,
